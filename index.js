@@ -139,14 +139,20 @@ Access        PUBLIC
 Parameters    isbn
 Method        PUT
 */
-shapeAI.put("/book/update/:isbn", (req, res) => {
-    database.books.forEach((book) => {
-        if(book.ISBN === req.params.isbn) {
-            book.title = req.body.bookTitle;
-            return;
+shapeAI.put("/book/update/:isbn", async (req, res) => {
+
+    const updatedBook = await BookModel.findOneAndUpdate(
+        {
+            ISBN: req.params.isbn,
+        },
+        {
+            title: req.body.bookTitle,
+        },
+        {
+            new: true, // to get updated
         }
-    });
-    return res.json({books: database.books});
+    );
+    return res.json({books: updatedBook});
 });
 
 /*
@@ -156,21 +162,49 @@ Access        PUBLIC
 Parameters    isbn
 Method        PUT
 */
-shapeAI.put("/book/author/update/:isbn", (req, res) => {
+shapeAI.put("/book/author/update/:isbn", async (req, res) => {
+
     //update book database
-    database.books.forEach((book) => {
-        if(book.ISBN === req.params.isbn) {
-            return book.authors.push(req.body.newAuthor);
-        }
-    });
+    const updatedBook = await BookModel.findOneAndUpdate(
+        {
+            ISBN: req.params.isbn,
+        },
+        {
+            $addToSet : {
+                authors: req.body.newAuthor,
+            }
+        },
+        {
+            new: true,
+        },
+    );
+   // database.books.forEach((book) => {
+    //    if(book.ISBN === req.params.isbn) {
+    //        return book.authors.push(req.body.newAuthor);
+    //    
+    
     //update author database
-    database.authors.forEach((author) => {
+
+    const updatedAuthor = await AuthorModel.findOneAndUpdate(
+        {
+            id: req.body.newAuthor
+        },
+        {
+            $push: {
+                books: req.params.isbn,
+            }
+        },
+        {
+            new: true
+        }
+    );
+   /* database.authors.forEach((author) => {
         if(author.id === req.body.newAuthor) 
             return author.books.push(req.params.isbn);
-    });
+    });*/
     return res.json({
-        books: database.books,
-        authors: database.authors,
+        books: updatedBook,
+        authors: updatedAuthor,
         message: "New author was added",
     });
 });
