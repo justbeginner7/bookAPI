@@ -261,19 +261,19 @@ Access        PUBLIC
 Parameters    isbn, author id
 Method        DELETE
 */
-shapeAI.delete(":isbn/:authorId", async (req, res) => {
-    // update book database/book/delete/author/
+shapeAI.delete("/book/delete/author/:isbn/:authorId", async (req, res) => {
+    // update book database
     const updatedBook = await BookModel.findOneAndUpdate(
     {
-        ISBN: req.params.isbn
+        ISBN: req.params.isbn,
     },
     {
         $pull : {
-            authors: parseInt(req.params.authorId)
+            authors: parseInt(req.params.authorId),
         }
     },
     {
-        new: true
+        new: true,
     }
     );
   /*database.books.forEach((book) => {
@@ -286,17 +286,17 @@ shapeAI.delete(":isbn/:authorId", async (req, res) => {
     //update author database
     const updatedAuthor = await AuthorModel.findOneAndUpdate(
         {
-            id: parseInt(req.params.authorId)
+            id: parseInt(req.params.authorId),
         },
         {
             $pull: {
-                books: req.params.isbn
+                books: req.params.isbn,
             }
         },
         {
-            new: true
+            new: true,
         }
-    )
+    );
    /* database.authors.forEach((author) => {
         if(author.id === parseInt(req.params.authorId)) {
             const newBookList = author.books.filter((book) => book !== req.params.isbn);
